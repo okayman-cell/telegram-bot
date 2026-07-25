@@ -148,19 +148,6 @@ async def antimat_system(msg: Message):
                 await msg.answer("❗ Не удалось выдать мут. Возможно, у бота нет прав.")
                 print(e)
 #####
-@dp.message(Command("warns"))
-async def show_warns(msg: Message):
-    if not warnings:
-        await msg.answer("📭 Предупреждений нет.")
-        return
-
-    text = "📋 Список предупреждений:\n\n"
-
-    for user_id, count in warnings.items():
-        text += f"• ID {user_id} — {count} предупреждений\n"
-
-    await msg.answer(text)
-
 
 
 ####

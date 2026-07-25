@@ -11,65 +11,6 @@ TOKEN = os.getenv("TOKEN")
 bot = Bot(TOKEN)
 dp = Dispatcher()
 ########
-from aiogram import Bot, Dispatcher
-from aiogram.types import Message
-from aiogram.filters import Command
-import asyncio
-
-TOKEN = "ТВОЙ_ТОКЕН"
-
-bot = Bot(TOKEN)
-dp = Dispatcher()
-
-# Хранилище предупреждений
-warnings = {}
-
-# Список мата
-BAD_WORDS = ["блять", "сука", "нахуй", "пизда", "хуй", "ебать"]
-
-MAX_WARNINGS = 3
-
-
-@dp.message()
-async def warn_system(msg: Message):
-    if not msg.text:
-        return
-
-    text = msg.text.lower()
-
-    # Проверяем мат
-    if any(word in text for word in BAD_WORDS):
-
-        user_id = msg.from_user.id
-
-        # Добавляем предупреждение
-        warnings[user_id] = warnings.get(user_id, 0) + 1
-        warn_count = warnings[user_id]
-
-        await msg.answer(
-            f"⚠️ {msg.from_user.full_name}, предупреждение {warn_count}/{MAX_WARNINGS}."
-        )
-
-
-@dp.message(Command("warns"))
-async def show_warns(msg: Message):
-    if not warnings:
-        await msg.answer("📭 Предупреждений нет.")
-        return
-
-    text = "📋 Список предупреждений:\n\n"
-
-    for user_id, count in warnings.items():
-        text += f"• ID {user_id} — {count} предупреждений\n"
-
-    await msg.answer(text)
-
-
-async def main():
-    await dp.start_polling(bot)
-
-if __name__ == "__main__":
-    asyncio.run(main())
 
 
 #####

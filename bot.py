@@ -161,7 +161,7 @@ async def show_warns(msg: Message):
 ####
 ####
 
-@dp.message(Command("coin"))
+@dp.message(Command("ping"))
 async def coin(msg: Message):
     result = random.choice(["pong,bot is working"])
     await msg.answer(f"🪙 Монета: {result}")

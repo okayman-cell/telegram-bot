@@ -2,6 +2,8 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
 from aiogram.types import Message, ChatPermissions
 import asyncio
+dp.include_router(router)
+
 
 import os 
 TOKEN = os.getenv("TOKEN")

@@ -214,15 +214,22 @@ async def unmute(message: Message):
 
     await message.answer("🔊 Пользователь размучен.")
 
-@dp.message(Command("Help"))
-async def ban(message: Message):
-    if not message.reply_to_message:
-        await message.answer("у него есть команды: /mute -- мут навседа,/unmute -- унмут если ктота был замучен ,/del -- удалить когото сообщение ,/Help -- помощь.")
-        return
+@dp.message(Command("help"))
+async def help_cmd(msg: Message):
+    text = (
+        "📘 *Список команд бота:*\n\n"
+        "⚠️ /warn — выдать предупреждение (в ответ на сообщение)\n"
+        "🧹 /clear — сбросить варны пользователя (в ответ)\n"
+        "📋 /warns — показать все предупреждения\n"
+        "🪙 /coin — орёл или решка\n"
+        "💬 /quote — случайная цитата\n"
+        "🏓 /ping — проверить задержку бота\n"
+        "🔇 Автоматический мут после 3 варнов\n"
+        "\n"
+        "/help — дурка едет тебя спосать!"
+    )
 
-  
-
-    await message.answer("/mute -- мут навседа,/unmute -- унмут если ктота был замучен ,/del -- удалить когото сообщение ,/Help -- помощь.")
+    await msg.answer(text, parse_mode="Markdown")
 
 @dp.message(Command("del"))
 async def kick(message: Message):

@@ -142,7 +142,7 @@ async def mute_user(msg: Message):
 
     user = msg.reply_to_message.from_user
     user_id = user.id
-    MUTE_TIME = 2400  # минут
+    MUTE_TIME = 20  # минут
 
     try:
         await msg.bot.restrict_chat_member(

@@ -53,20 +53,17 @@ async def unmute(message: Message):
 
     await message.answer("🔊 Пользователь размучен.")
 
-@dp.message(Command("ban"))
+@dp.message(Command("Help"))
 async def ban(message: Message):
     if not message.reply_to_message:
-        await message.answer("Ответь на сообщение пользователя.")
+        await message.answer("/mute -- мут навседа,/unmute -- унмут если ктота был замучен ,/rep -- удалить когото сообщение ,/Help -- помощь.")
         return
 
-    await bot.ban_chat_member(
-        message.chat.id,
-        message.reply_to_message.from_user.id
-    )
+  
 
-    await message.answer("⛔ Пользователь забанен.")
+    await message.answer("/mute -- мут навседа,/unmute -- унмут если ктота был замучен ,/rep -- удалить когото сообщение ,/Help -- помощь.")
 
-@dp.message(Command("kick"))
+@dp.message(Command("rep"))
 async def kick(message: Message):
     if not message.reply_to_message:
         await message.answer("Ответь на сообщение пользователя.")
@@ -74,8 +71,8 @@ async def kick(message: Message):
 
     user = message.reply_to_message.from_user.id
 
-    await bot.ban_chat_member(message.chat.id, user)
-    await bot.unban_chat_member(message.chat.id, user)
+    
+    await bot.delete_message(message.chat.id, user)
 
     await message.answer("👢 Пользователь кикнут.")
 

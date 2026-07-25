@@ -124,14 +124,7 @@ async def antimat_system(msg: Message):
 
 # ------------------ ПИНГ ------------------
 
-@dp.message(Command("ping"))
-async def ping(msg: Message):
-    start = time.time()
-    reply = await msg.answer("🏓 Pong!")
-    end = time.time()
 
-    ping_ms = int((end - start) * 1000)
-    await reply.edit_text(f"🏓 Pong! ({ping_ms} ms)")
 
 
 # ------------------ СТАРТ ------------------

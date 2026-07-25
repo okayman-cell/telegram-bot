@@ -9,36 +9,65 @@ TOKEN = os.getenv("TOKEN")
 bot = Bot(TOKEN)
 dp = Dispatcher()
 ########
-@dp.message_handler(commands=["unmute_all"])
-async def unmute_all(msg: types.Message):
-    chat_id = msg.chat.id
+from aiogram import Bot, Router
+from aiogram.types import Message
 
-    # Получаем список участников
-    members = await bot.get_chat_administrators(chat_id)
+router = Router()
 
-    # Снимаем мут со всех НЕ админов
-    async for member in bot.iter_chat_members(chat_id):
-        user_id = member.user.id
+# Список запрещённых слов
+BAD_WORDS = ["блять", "сука", "нахуй", "пизда", "хуй", "ебать","бля","сучяра"]
 
-        # Пропускаем админов
-        if any(admin.user.id == user_id for admin in members):
-            continue
+# Хранилище предупреждений
+warnings = {}
 
-        try:
-            await bot.restrict_chat_member(
-                chat_id=chat_id,
-                user_id=user_id,
-                permissions=types.ChatPermissions(
-                    can_send_messages=True,
-                    can_send_media_messages=True,
-                    can_send_other_messages=True,
-                    can_add_web_page_previews=True
-                )
+MAX_WARNINGS = 3  # лимит предупреждений
+
+@router.message()
+async def warn_system(msg: Message, bot: Bot):
+    text = msg.text.lower()
+
+    # Проверяем мат
+    if any(word in text for word in BAD_WORDS):
+
+        # Удаляем сообщение
+        await bot.delete_message(msg.chat.id, msg.message_id)
+
+        user_id = msg.from_user.id
+
+        # Добавляем предупреждение
+        warnings[user_id] = warnings.get(user_id, 0) + 1
+        warn_count = warnings[user_id]
+
+        # Если не достиг лимита — выдаём предупреждение
+        if warn_count < MAX_WARNINGS:
+            await msg.answer(
+                f"⚠️ Предупреждение {warn_count}/{MAX_WARNINGS} для "
+                f"{msg.from_user.full_name}. Мат запрещён."
             )
-        except Exception as e:
-            print("Ошибка:", e)
+        else:
+            await msg.answer(
+                f"❗ {msg.from_user.full_name}, лимит предупреждений достигнут. "
+                f"Дальнейшие нарушения будут фиксироваться."
+            )
+@router.message(Command("warns"))
+async def show_warns(msg: Message, bot: Bot):
+    if not warnings:
+        await msg.answer("📭 Предупреждений нет.")
+        return
 
-    await msg.reply("Все пользователи размучены.")
+    text = "📋 Список предупреждений:\n\n"
+
+    for user_id, count in warnings.items():
+        try:
+            user = await bot.get_chat_member(msg.chat.id, user_id)
+            name = user.user.full_name
+        except:
+            name = "Неизвестный пользователь"
+
+        text += f"• {name} — {count} предупреждений\n"
+
+    await msg.answer(text)
+
 #####
 @dp.message(Command("start"))
 async def start(message: Message):
@@ -87,14 +116,14 @@ async def unmute(message: Message):
 @dp.message(Command("Help"))
 async def ban(message: Message):
     if not message.reply_to_message:
-        await message.answer("/mute -- мут навседа,/unmute -- унмут если ктота был замучен ,/rep -- удалить когото сообщение ,/Help -- помощь.")
+        await message.answer(" бот сам ловит маты и у него есть команды: /mute -- мут навседа,/unmute -- унмут если ктота был замучен ,/del -- удалить когото сообщение ,/Help -- помощь ,/warns -- посмотреть варны .")
         return
 
   
 
     await message.answer("/mute -- мут навседа,/unmute -- унмут если ктота был замучен ,/rep -- удалить когото сообщение ,/Help -- помощь.")
 
-@dp.message(Command("rep"))
+@dp.message(Command("del"))
 async def kick(message: Message):
     if not message.reply_to_message:
         await message.answer("Ответь на сообщение пользователя.")

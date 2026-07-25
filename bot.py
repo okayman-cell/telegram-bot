@@ -98,7 +98,7 @@ warnings = {}
 BAD_WORDS = ["блять", "сука", "нахуй", "пизда", "хуй", "ебать","бля"]
 
 MAX_WARNINGS = 3   # после 3 варнов — мут
-MUTE_TIME = 5      # минут
+MUTE_TIME = 60      # минут
 
 
 @dp.message()
@@ -161,10 +161,10 @@ async def show_warns(msg: Message):
 ####
 ####
 
-@dp.message(Command("ping"))
-async def start(message: Message):
-    await message.answer("pong")
-
+@dp.message(Command("coin"))
+async def coin(msg: Message):
+    result = random.choice(["pong,bot is working"])
+    await msg.answer(f"🪙 Монета: {result}")
 
 
 #####

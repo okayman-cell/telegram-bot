@@ -11,23 +11,6 @@ TOKEN = os.getenv("TOKEN")
 bot = Bot(TOKEN)
 dp = Dispatcher()
 ########
-from aiogram import Router
-from aiogram.types import Message
-from aiogram.filters import Command
-import time
-
-router = Router()
-
-@router.message(Command("ping"))
-async def ping(msg: Message):
-    start = time.time()
-    reply = await msg.answer("🏓 Pong!")
-    end = time.time()
-
-    ping_ms = int((end - start) * 1000)
-
-    await reply.edit_text(f"🏓 Pong! ({ping_ms} ms)")
-
 
 #####
 @dp.message(Command("start"))

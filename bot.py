@@ -8,7 +8,38 @@ TOKEN = os.getenv("TOKEN")
 
 bot = Bot(TOKEN)
 dp = Dispatcher()
+########
+@dp.message_handler(commands=["unmute_all"])
+async def unmute_all(msg: types.Message):
+    chat_id = msg.chat.id
 
+    # Получаем список участников
+    members = await bot.get_chat_administrators(chat_id)
+
+    # Снимаем мут со всех НЕ админов
+    async for member in bot.iter_chat_members(chat_id):
+        user_id = member.user.id
+
+        # Пропускаем админов
+        if any(admin.user.id == user_id for admin in members):
+            continue
+
+        try:
+            await bot.restrict_chat_member(
+                chat_id=chat_id,
+                user_id=user_id,
+                permissions=types.ChatPermissions(
+                    can_send_messages=True,
+                    can_send_media_messages=True,
+                    can_send_other_messages=True,
+                    can_add_web_page_previews=True
+                )
+            )
+        except Exception as e:
+            print("Ошибка:", e)
+
+    await msg.reply("Все пользователи размучены.")
+#####
 @dp.message(Command("start"))
 async def start(message: Message):
     await message.answer("Бот запущен!")
@@ -74,10 +105,10 @@ async def kick(message: Message):
     
     await bot.delete_message(message.chat.id, user)
 
-    await message.answer("👢 Пользователь кикнут.")
+    await message.answer("👢сообщение удалено.")
 
 async def main():
-    print("bot start")
+    print("hello!! this is group management bot")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":

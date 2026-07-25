@@ -129,9 +129,7 @@ async def antimat_system(msg: Message):
 
 # ------------------ СТАРТ ------------------
 
-@dp.message(Command("start"))
-async def start(message: Message):
-    await message.answer("Бот запущен!")
+
 
 
 # ------------------ МУТ / УНМУТ ------------------

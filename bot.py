@@ -60,12 +60,12 @@ async def unmute(message: Message):
 @dp.message(Command("Help"))
 async def ban(message: Message):
     if not message.reply_to_message:
-        await message.answer(" бот сам ловит маты и у него есть команды: /mute -- мут навседа,/unmute -- унмут если ктота был замучен ,/del -- удалить когото сообщение ,/Help -- помощь ,/warns -- посмотреть варны .")
+        await message.answer("у него есть команды: /mute -- мут навседа,/unmute -- унмут если ктота был замучен ,/del -- удалить когото сообщение ,/Help -- помощь.")
         return
 
   
 
-    await message.answer("/mute -- мут навседа,/unmute -- унмут если ктота был замучен ,/rep -- удалить когото сообщение ,/Help -- помощь.")
+    await message.answer("/mute -- мут навседа,/unmute -- унмут если ктота был замучен ,/del -- удалить когото сообщение ,/Help -- помощь.")
 
 @dp.message(Command("del"))
 async def kick(message: Message):

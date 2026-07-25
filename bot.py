@@ -11,17 +11,17 @@ TOKEN = os.getenv("TOKEN")
 bot = Bot(TOKEN)
 dp = Dispatcher()
 ########
-import asyncio
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message
 from aiogram.filters import Command
+import asyncio
 
 TOKEN = "ТВОЙ_ТОКЕН"
 
 bot = Bot(TOKEN)
 dp = Dispatcher()
 
-# Глобальный словарь варнов
+# Хранилище предупреждений
 warnings = {}
 
 # Список мата
@@ -32,7 +32,6 @@ MAX_WARNINGS = 3
 
 @dp.message()
 async def warn_system(msg: Message):
-    # Если нет текста — игнорируем
     if not msg.text:
         return
 
@@ -40,9 +39,6 @@ async def warn_system(msg: Message):
 
     # Проверяем мат
     if any(word in text for word in BAD_WORDS):
-
-        # Удаляем сообщение
-        await bot.delete_message(msg.chat.id, msg.message_id)
 
         user_id = msg.from_user.id
 

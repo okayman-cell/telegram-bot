@@ -161,10 +161,20 @@ async def show_warns(msg: Message):
 ####
 ####
 
+import time
+from aiogram.filters import Command
+from aiogram.types import Message
+
 @dp.message(Command("ping"))
-async def coin(msg: Message):
-    result = random.choice(["pong,bot is working"])
-    await msg.answer(f"🪙 Монета: {result}")
+async def ping(msg: Message):
+    start = time.time()
+
+    reply = await msg.answer("🏓 Pong!")
+    end = time.time()
+
+    ping_ms = int((end - start) * 1000)
+
+    await reply.edit_text(f"🏓 Pong! ({ping_ms} ms)")
 
 
 #####

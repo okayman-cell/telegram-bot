@@ -161,9 +161,7 @@ async def show_warns(msg: Message):
 ####
 ####
 
-import time
-from aiogram.filters import Command
-from aiogram.types import Message
+
 
 @dp.message(Command("ping"))
 async def ping(msg: Message):

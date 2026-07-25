@@ -136,21 +136,25 @@ async def antimat_system(msg: Message):
 
 @dp.message(Command("mute"))
 async def mute_user(msg: Message):
+    # Команда должна быть в ответ на сообщение
     if not msg.reply_to_message:
         await msg.answer("❗ Используй команду в ответ на сообщение пользователя.")
         return
 
     user = msg.reply_to_message.from_user
     user_id = user.id
-    MUTE_TIME = 20  # минут
+
+    # Время мута (в минутах)
+    MUTE_TIME = 60  # 1 час
 
     try:
         await msg.bot.restrict_chat_member(
-            msg.chat.id,
-            user_id,
-            permissions={"can_send_messages": False},
+            chat_id=msg.chat.id,
+            user_id=user_id,
+            permissions=ChatPermissions(can_send_messages=False),
             until_date=timedelta(minutes=MUTE_TIME)
         )
+
         await msg.answer(f"🔇 {user.full_name} получил мут на {MUTE_TIME} минут.")
 
     except Exception as e:
@@ -169,15 +173,17 @@ async def unmute_user(msg: Message):
 
     try:
         await msg.bot.restrict_chat_member(
-            msg.chat.id,
-            user_id,
-            permissions={"can_send_messages": True}
+            chat_id=msg.chat.id,
+            user_id=user_id,
+            permissions=ChatPermissions(can_send_messages=True)
         )
+
         await msg.answer(f"🔊 {user.full_name} теперь может писать сообщения.")
 
     except Exception as e:
         await msg.answer("❗ Не удалось снять мут. У бота нет прав.")
         print(e)
+
 
 
 # ------------------ HELP ------------------

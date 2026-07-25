@@ -144,9 +144,8 @@ async def antimat_system(msg: Message):
                 # Сбрасываем варны после мута
                 warnings[user_id] = 0
 
-            except Exception as e:
-                await msg.answer("❗ Не удалось выдать мут. Возможно, у бота нет прав.")
-                print(e)
+            
+              
 #####
 
 

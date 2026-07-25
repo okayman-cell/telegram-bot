@@ -2,6 +2,11 @@ from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command
 from aiogram.types import Message, ChatPermissions
 import asyncio
+import os
+import random
+from datetime import timedelta
+import time
+
 
 
 
@@ -183,44 +188,53 @@ async def start(message: Message):
     await message.answer("Бот запущен!")
 
 @dp.message(Command("mute"))
-async def mute(message: Message):
-    if not message.reply_to_message:
-        await message.answer("Ответь на сообщение пользователя.")
+async def mute_user(msg: Message):
+    # Команда должна быть в ответ на сообщение
+    if not msg.reply_to_message:
+        await msg.answer("❗ Используй команду в ответ на сообщение пользователя.")
         return
 
-    user = message.reply_to_message.from_user.id
+    user = msg.reply_to_message.from_user
+    user_id = user.id
 
-    await bot.restrict_chat_member(
-        chat_id=message.chat.id,
-        user_id=user,
-        permissions=ChatPermissions(
-            can_send_messages=False
+    # Время мута (в минутах)
+    MUTE_TIME = 2400
+
+    try:
+        await msg.bot.restrict_chat_member(
+            msg.chat.id,
+            user_id,
+            permissions={"can_send_messages": False},
+            until_date=timedelta(minutes=MUTE_TIME)
         )
-    )
 
-    await message.answer("🔇 Пользователь замучен.")
+        await msg.answer(f"🔇 {user.full_name} получил мут на {MUTE_TIME} минут.")
+
+    except Exception as e:
+        await msg.answer("❗ Не удалось выдать мут. У бота нет прав.")
+        print(e)
 
 @dp.message(Command("unmute"))
-async def unmute(message: Message):
-    if not message.reply_to_message:
-        await message.answer("Ответь на сообщение пользователя.")
+async def unmute_user(msg: Message):
+    if not msg.reply_to_message:
+        await msg.answer("❗ Используй команду в ответ на сообщение пользователя.")
         return
 
-    user = message.reply_to_message.from_user.id
+    user = msg.reply_to_message.from_user
+    user_id = user.id
 
-    await bot.restrict_chat_member(
-        chat_id=message.chat.id,
-        user_id=user,
-        permissions=ChatPermissions(
-            can_send_messages=True,
-            can_send_photos=True,
-            can_send_videos=True,
-            can_send_documents=True,
-            can_send_other_messages=True
+    try:
+        await msg.bot.restrict_chat_member(
+            msg.chat.id,
+            user_id,
+            permissions={"can_send_messages": True}
         )
-    )
 
-    await message.answer("🔊 Пользователь размучен.")
+        await msg.answer(f"🔊 {user.full_name} теперь может писать сообщения.")
+
+    except Exception as e:
+        await msg.answer("❗ Не удалось снять мут. У бота нет прав.")
+        print(e)
 
 @dp.message(Command("help"))
 async def help_cmd(msg: Message):

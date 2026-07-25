@@ -11,19 +11,25 @@ dp = Dispatcher()
 ########
 from aiogram import Bot, Router
 from aiogram.types import Message
+from aiogram.filters import Command
 
 router = Router()
 
-# Список запрещённых слов
-BAD_WORDS = ["блять", "сука", "нахуй", "пизда", "хуй", "ебать","бля","сучяра"]
-
-# Хранилище предупреждений
+# Глобальный словарь варнов
 warnings = {}
 
-MAX_WARNINGS = 3  # лимит предупреждений
+# Список мата
+BAD_WORDS = ["блять", "сука", "нахуй", "пизда", "хуй", "ебать"]
+
+MAX_WARNINGS = 3
+
 
 @router.message()
 async def warn_system(msg: Message, bot: Bot):
+    # Если нет текста — игнорируем
+    if not msg.text:
+        return
+
     text = msg.text.lower()
 
     # Проверяем мат
@@ -38,17 +44,12 @@ async def warn_system(msg: Message, bot: Bot):
         warnings[user_id] = warnings.get(user_id, 0) + 1
         warn_count = warnings[user_id]
 
-        # Если не достиг лимита — выдаём предупреждение
-        if warn_count < MAX_WARNINGS:
-            await msg.answer(
-                f"⚠️ Предупреждение {warn_count}/{MAX_WARNINGS} для "
-                f"{msg.from_user.full_name}. Мат запрещён."
-            )
-        else:
-            await msg.answer(
-                f"❗ {msg.from_user.full_name}, лимит предупреждений достигнут. "
-                f"Дальнейшие нарушения будут фиксироваться."
-            )
+        # Выводим предупреждение
+        await msg.answer(
+            f"⚠️ {msg.from_user.full_name}, предупреждение {warn_count}/{MAX_WARNINGS}."
+        )
+
+
 @router.message(Command("warns"))
 async def show_warns(msg: Message, bot: Bot):
     if not warnings:
@@ -62,11 +63,13 @@ async def show_warns(msg: Message, bot: Bot):
             user = await bot.get_chat_member(msg.chat.id, user_id)
             name = user.user.full_name
         except:
-            name = "Неизвестный пользователь"
+            name = f"ID {user_id}"
 
         text += f"• {name} — {count} предупреждений\n"
 
     await msg.answer(text)
+
+
 
 #####
 @dp.message(Command("start"))

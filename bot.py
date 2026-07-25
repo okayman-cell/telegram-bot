@@ -11,11 +11,15 @@ TOKEN = os.getenv("TOKEN")
 bot = Bot(TOKEN)
 dp = Dispatcher()
 ########
-from aiogram import Bot, Router
+import asyncio
+from aiogram import Bot, Dispatcher
 from aiogram.types import Message
 from aiogram.filters import Command
 
-router = Router()
+TOKEN = "ТВОЙ_ТОКЕН"
+
+bot = Bot(TOKEN)
+dp = Dispatcher()
 
 # Глобальный словарь варнов
 warnings = {}
@@ -26,8 +30,8 @@ BAD_WORDS = ["блять", "сука", "нахуй", "пизда", "хуй", "е
 MAX_WARNINGS = 3
 
 
-@router.message()
-async def warn_system(msg: Message, bot: Bot):
+@dp.message()
+async def warn_system(msg: Message):
     # Если нет текста — игнорируем
     if not msg.text:
         return
@@ -46,14 +50,13 @@ async def warn_system(msg: Message, bot: Bot):
         warnings[user_id] = warnings.get(user_id, 0) + 1
         warn_count = warnings[user_id]
 
-        # Выводим предупреждение
         await msg.answer(
             f"⚠️ {msg.from_user.full_name}, предупреждение {warn_count}/{MAX_WARNINGS}."
         )
 
 
-@router.message(Command("warns"))
-async def show_warns(msg: Message, bot: Bot):
+@dp.message(Command("warns"))
+async def show_warns(msg: Message):
     if not warnings:
         await msg.answer("📭 Предупреждений нет.")
         return
@@ -61,16 +64,16 @@ async def show_warns(msg: Message, bot: Bot):
     text = "📋 Список предупреждений:\n\n"
 
     for user_id, count in warnings.items():
-        try:
-            user = await bot.get_chat_member(msg.chat.id, user_id)
-            name = user.user.full_name
-        except:
-            name = f"ID {user_id}"
-
-        text += f"• {name} — {count} предупреждений\n"
+        text += f"• ID {user_id} — {count} предупреждений\n"
 
     await msg.answer(text)
 
+
+async def main():
+    await dp.start_polling(bot)
+
+if __name__ == "__main__":
+    asyncio.run(main())
 
 
 #####

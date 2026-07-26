@@ -101,27 +101,20 @@ async def antimat_system(msg: Message):
 
         await msg.answer(f"⚠️ {msg.from_user.full_name}, предупреждение {warn_count}/{MAX_WARNINGS}.")
 
-if warn_count >= MAX_WARNINGS:
-    try:
-        await msg.bot.restrict_chat_member(
-            chat_id=msg.chat.id,
-            user_id=user_id,
-            permissions=ChatPermissions(can_send_messages=False),
-            until_date=timedelta(minutes=MUTE_TIME)
-        )
+        if warn_count >= MAX_WARNINGS:
+            try:
+                await msg.bot.restrict_chat_member(
+                    chat_id=msg.chat.id,
+                    user_id=user_id,
+                    permissions=ChatPermissions(can_send_messages=False),
+                    until_date=timedelta(minutes=AUTO_MUTE_TIME)
+                )
 
-        await msg.answer(
-            f"🔇 {msg.from_user.full_name} получил мут на {MUTE_TIME} минут."
-        )
+                await msg.answer(
+                    f"🔇 {msg.from_user.full_name} получил мут на {AUTO_MUTE_TIME} минут."
+                )
 
-        warnings[user_id] = 0
-    except Exception as e:
-        await msg.answer("❗ Не удалось выдать мут. Возможно, у бота нет прав.")
-        print(e)
-
-
-            await msg.answer(f"🔇 {msg.from_user.full_name} получил мут на {AUTO_MUTE_TIME} минут.")
-            warnings[user_id] = 0
+                warnings[user_id] = 0
 
             except Exception as e:
                 await msg.answer("❗ Не удалось выдать мут. Возможно, у бота нет прав.")
@@ -196,15 +189,15 @@ async def unmute_user(msg: Message):
 async def help_cmd(msg: Message):
     text = (
         "📘 *Команды бота:*\n\n"
-        f"⚠️ /warn — выдать предупреждение ({'[warn](ca://s?q=warn)'} )\n"
-        f"🧹 /clear — сбросить варны ({'[clear](ca://s?q=clear)'} )\n"
-        f"📋 /warns — список предупреждений ({'[warns](ca://s?q=warns)'} )\n"
-        f"🪙 /coin — монетка ({'[coin](ca://s?q=coin)'} )\n"
-        f"💬 /quote — цитата ({'[quote](ca://s?q=quote)'} )\n"
-        f"🏓 /ping — задержка ({'[ping](ca://s?q=ping)'} )\n"
-        f"🔇 /mute — мут ({'[mute](ca://s?q=mute)'} )\n"
-        f"🔊 /unmute — размут ({'[unmute](ca://s?q=unmute)'} )\n"
-        f"👢 /del — удалить сообщение ({'[del](ca://s?q=del)'} )\n"
+        "⚠️ /warn — выдать предупреждение\n"
+        "🧹 /clear — сбросить варны\n"
+        "📋 /warns — список предупреждений\n"
+        "🪙 /coin — монетка\n"
+        "💬 /quote — цитата\n"
+        "🏓 /ping — задержка\n"
+        "🔇 /mute — мут\n"
+        "🔊 /unmute — размут\n"
+        "👢 /del — удалить сообщение\n"
         "\n"
         "Анти‑мат и авто‑мут включены."
     )
@@ -232,4 +225,3 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
-

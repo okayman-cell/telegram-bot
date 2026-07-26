@@ -115,14 +115,13 @@ if warn_count >= MAX_WARNINGS:
         )
 
         warnings[user_id] = 0
-
     except Exception as e:
         await msg.answer("❗ Не удалось выдать мут. Возможно, у бота нет прав.")
         print(e)
 
 
-                await msg.answer(f"🔇 {msg.from_user.full_name} получил мут на {AUTO_MUTE_TIME} минут.")
-                warnings[user_id] = 0
+            await msg.answer(f"🔇 {msg.from_user.full_name} получил мут на {AUTO_MUTE_TIME} минут.")
+            warnings[user_id] = 0
 
             except Exception as e:
                 await msg.answer("❗ Не удалось выдать мут. Возможно, у бота нет прав.")

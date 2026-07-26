@@ -101,14 +101,25 @@ async def antimat_system(msg: Message):
 
         await msg.answer(f"⚠️ {msg.from_user.full_name}, предупреждение {warn_count}/{MAX_WARNINGS}.")
 
-        if warn_count >= MAX_WARNINGS:
-            try:
-                await msg.bot.restrict_chat_member(
-                    chat_id=msg.chat.id,
-                    user_id=user_id,
-                    permissions=ChatPermissions(can_send_messages=False),
-                    until_date=timedelta(minutes=AUTO_MUTE_TIME)
-                )
+if warn_count >= MAX_WARNINGS:
+    try:
+        await msg.bot.restrict_chat_member(
+            chat_id=msg.chat.id,
+            user_id=user_id,
+            permissions=ChatPermissions(can_send_messages=False),
+            until_date=timedelta(minutes=MUTE_TIME)
+        )
+
+        await msg.answer(
+            f"🔇 {msg.from_user.full_name} получил мут на {MUTE_TIME} минут."
+        )
+
+        warnings[user_id] = 0
+
+    except Exception as e:
+        await msg.answer("❗ Не удалось выдать мут. Возможно, у бота нет прав.")
+        print(e)
+
 
                 await msg.answer(f"🔇 {msg.from_user.full_name} получил мут на {AUTO_MUTE_TIME} минут.")
                 warnings[user_id] = 0

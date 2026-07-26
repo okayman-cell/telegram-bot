@@ -1,14 +1,15 @@
 from aiogram import Bot, Dispatcher
 from aiogram.filters import Command
-from aiogram.types import Message
+from aiogram.types import Message, ChatPermissions
 import asyncio
 import os
 import random
 from datetime import timedelta
 import time
 
-TOKEN = os.getenv("TOKEN")
+# ------------------ TOKEN ------------------
 
+TOKEN = os.getenv("TOKEN")
 bot = Bot(TOKEN)
 dp = Dispatcher()
 
@@ -26,14 +27,12 @@ QUOTES = [
 async def quote(msg: Message):
     await msg.answer(f"💬 {random.choice(QUOTES)}")
 
-
 # ------------------ МОНЕТКА ------------------
 
 @dp.message(Command("coin"))
 async def coin(msg: Message):
     result = random.choice(["Орёл 🦅", "Решка 🎯"])
     await msg.answer(f"🪙 Монета: {result}")
-
 
 # ------------------ ВАРНЫ ------------------
 
@@ -54,7 +53,6 @@ async def warn(msg: Message):
 
     await msg.answer(f"⚠️ {user.full_name} получил предупреждение {warn_count}/{MAX_WARNINGS}.")
 
-
 @dp.message(Command("clear"))
 async def clear_warns(msg: Message):
     if not msg.reply_to_message:
@@ -71,7 +69,6 @@ async def clear_warns(msg: Message):
     warnings[user_id] = 0
     await msg.answer(f"✅ Предупреждения пользователя {user.full_name} сброшены.")
 
-
 @dp.message(Command("warns"))
 async def show_warns(msg: Message):
     if not warnings:
@@ -84,11 +81,10 @@ async def show_warns(msg: Message):
 
     await msg.answer(text)
 
-
 # ------------------ АНТИМАТ + АВТОМУТ ------------------
 
 BAD_WORDS = ["блять", "сука", "нахуй", "пизда", "хуй", "ебать", "бля"]
-MUTE_TIME = 60  # минут
+AUTO_MUTE_TIME = 60  # минут
 
 @dp.message()
 async def antimat_system(msg: Message):
@@ -108,44 +104,47 @@ async def antimat_system(msg: Message):
         if warn_count >= MAX_WARNINGS:
             try:
                 await msg.bot.restrict_chat_member(
-                    msg.chat.id,
-                    user_id,
-                    permissions={"can_send_messages": False},
-                    until_date=timedelta(minutes=MUTE_TIME)
+                    chat_id=msg.chat.id,
+                    user_id=user_id,
+                    permissions=ChatPermissions(can_send_messages=False),
+                    until_date=timedelta(minutes=AUTO_MUTE_TIME)
                 )
 
-                await msg.answer(f"🔇 {msg.from_user.full_name} получил мут на {MUTE_TIME} минут.")
+                await msg.answer(f"🔇 {msg.from_user.full_name} получил мут на {AUTO_MUTE_TIME} минут.")
                 warnings[user_id] = 0
 
             except Exception as e:
                 await msg.answer("❗ Не удалось выдать мут. Возможно, у бота нет прав.")
                 print(e)
 
-
 # ------------------ ПИНГ ------------------
 
+@dp.message(Command("ping"))
+async def ping(msg: Message):
+    start = time.time()
+    reply = await msg.answer("🏓 Pong!")
+    end = time.time()
 
-
+    ping_ms = int((end - start) * 1000)
+    await reply.edit_text(f"🏓 Pong! ({ping_ms} ms)")
 
 # ------------------ СТАРТ ------------------
 
-
-
+@dp.message(Command("start"))
+async def start(message: Message):
+    await message.answer("Бот запущен!")
 
 # ------------------ МУТ / УНМУТ ------------------
 
 @dp.message(Command("mute"))
 async def mute_user(msg: Message):
-    # Команда должна быть в ответ на сообщение
     if not msg.reply_to_message:
         await msg.answer("❗ Используй команду в ответ на сообщение пользователя.")
         return
 
     user = msg.reply_to_message.from_user
     user_id = user.id
-
-    # Время мута (в минутах)
-    MUTE_TIME = 60  # 1 час
+    MUTE_TIME = 2400  # минут
 
     try:
         await msg.bot.restrict_chat_member(
@@ -154,13 +153,11 @@ async def mute_user(msg: Message):
             permissions=ChatPermissions(can_send_messages=False),
             until_date=timedelta(minutes=MUTE_TIME)
         )
-
         await msg.answer(f"🔇 {user.full_name} получил мут на {MUTE_TIME} минут.")
 
     except Exception as e:
         await msg.answer("❗ Не удалось выдать мут. У бота нет прав.")
         print(e)
-
 
 @dp.message(Command("unmute"))
 async def unmute_user(msg: Message):
@@ -177,37 +174,32 @@ async def unmute_user(msg: Message):
             user_id=user_id,
             permissions=ChatPermissions(can_send_messages=True)
         )
-
         await msg.answer(f"🔊 {user.full_name} теперь может писать сообщения.")
 
     except Exception as e:
         await msg.answer("❗ Не удалось снять мут. У бота нет прав.")
         print(e)
 
-
-
 # ------------------ HELP ------------------
 
 @dp.message(Command("help"))
 async def help_cmd(msg: Message):
     text = (
-        "📘 *Список команд бота:*\n\n"
-        "⚠️ /warn — выдать предупреждение\n"
-        "🧹 /clear — сбросить варны\n"
-        "📋 /warns — список предупреждений\n"
-        "🪙 /coin — орёл или решка\n"
-        "💬 /quote — случайная цитата\n"
-        "🏓 /ping — задержка бота\n"
-        "🔇 Автоматический мут после 3 варнов\n"
-        "🔇 /mute — выдать мут\n"
-        "🔊 /unmute — снять мут\n"
-        "👢 /del — удалить сообщение\n"
+        "📘 *Команды бота:*\n\n"
+        f"⚠️ /warn — выдать предупреждение ({'[warn](ca://s?q=warn)'} )\n"
+        f"🧹 /clear — сбросить варны ({'[clear](ca://s?q=clear)'} )\n"
+        f"📋 /warns — список предупреждений ({'[warns](ca://s?q=warns)'} )\n"
+        f"🪙 /coin — монетка ({'[coin](ca://s?q=coin)'} )\n"
+        f"💬 /quote — цитата ({'[quote](ca://s?q=quote)'} )\n"
+        f"🏓 /ping — задержка ({'[ping](ca://s?q=ping)'} )\n"
+        f"🔇 /mute — мут ({'[mute](ca://s?q=mute)'} )\n"
+        f"🔊 /unmute — размут ({'[unmute](ca://s?q=unmute)'} )\n"
+        f"👢 /del — удалить сообщение ({'[del](ca://s?q=del)'} )\n"
         "\n"
-        "/help — помощь"
+        "Анти‑мат и авто‑мут включены."
     )
 
     await msg.answer(text, parse_mode="Markdown")
-
 
 # ------------------ УДАЛЕНИЕ СООБЩЕНИЯ ------------------
 
@@ -222,12 +214,12 @@ async def delete_msg(message: Message):
 
     await message.answer("👢 Сообщение удалено.")
 
-
 # ------------------ ЗАПУСК ------------------
 
 async def main():
-    print("hello!! this is group management bot")
+    print("Бот запущен!")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
     asyncio.run(main())
+

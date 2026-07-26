@@ -12,7 +12,107 @@ import time
 TOKEN = os.getenv("TOKEN")
 bot = Bot(TOKEN)
 dp = Dispatcher()
+############################################
+# ------------------ ПИНГ ------------------
 
+@dp.message(Command("ping"))
+async def ping(msg: Message):
+    start = time.time()
+    reply = await msg.answer("🏓 Pong!")
+    end = time.time()
+
+    ping_ms = int((end - start) * 1000)
+    await reply.edit_text(f"🏓 Pong! ({ping_ms} ms)")
+
+# ------------------ СТАРТ ------------------
+
+@dp.message(Command("start"))
+async def start(message: Message):
+    await message.answer("Бот запущен!")
+
+# ------------------ МУТ / УНМУТ ------------------
+
+@dp.message(Command("mute"))
+async def mute_user(msg: Message):
+    if not msg.reply_to_message:
+        await msg.answer("❗ Используй команду в ответ на сообщение пользователя.")
+        return
+
+    user = msg.reply_to_message.from_user
+    user_id = user.id
+    MUTE_TIME = 2400  # минут
+
+    try:
+        await msg.bot.restrict_chat_member(
+            chat_id=msg.chat.id,
+            user_id=user_id,
+            permissions=ChatPermissions(can_send_messages=False),
+            until_date=timedelta(minutes=MUTE_TIME)
+        )
+        await msg.answer(f"🔇 {user.full_name} получил мут на {MUTE_TIME} минут.")
+
+    except Exception as e:
+        await msg.answer("❗ Не удалось выдать мут. У бота нет прав.")
+        print(e)
+
+@dp.message(Command("unmute"))
+async def unmute_user(msg: Message):
+    if not msg.reply_to_message:
+        await msg.answer("❗ Используй команду в ответ на сообщение пользователя.")
+        return
+
+    user = msg.reply_to_message.from_user
+    user_id = user.id
+
+    try:
+        await msg.bot.restrict_chat_member(
+            chat_id=msg.chat.id,
+            user_id=user_id,
+            permissions=ChatPermissions(can_send_messages=True)
+        )
+        await msg.answer(f"🔊 {user.full_name} теперь может писать сообщения.")
+
+    except Exception as e:
+        await msg.answer("❗ Не удалось снять мут. У бота нет прав.")
+        print(e)
+
+# ------------------ HELP ------------------
+
+@dp.message(Command("help"))
+async def help_cmd(msg: Message):
+    text = (
+        "📘 *Команды бота:*\n\n"
+        "⚠️ /warn — выдать предупреждение\n"
+        "🧹 /clear — сбросить варны\n"
+        "📋 /warns — список предупреждений\n"
+        "🪙 /coin — монетка\n"
+        "💬 /quote — цитата\n"
+        "🏓 /ping — задержка\n"
+        "🔇 /mute — мут\n"
+        "🔊 /unmute — размут\n"
+        "👢 /del — удалить сообщение\n"
+        "\n"
+        "Анти‑мат и авто‑мут включены."
+    )
+
+    await msg.answer(text, parse_mode="Markdown")
+
+# ------------------ УДАЛЕНИЕ СООБЩЕНИЯ ------------------
+
+@dp.message(Command("del"))
+async def delete_msg(message: Message):
+    if not message.reply_to_message:
+        await message.answer("Ответь на сообщение пользователя.")
+        return
+
+    msg_id = message.reply_to_message.message_id
+    await bot.delete_message(message.chat.id, msg_id)
+
+    await message.answer("👢 Сообщение удалено.")
+
+
+
+############################################
 # ------------------ ЦИТАТЫ ------------------
 
 QUOTES = [
@@ -120,102 +220,6 @@ async def antimat_system(msg: Message):
                 await msg.answer("❗ Не удалось выдать мут. Возможно, у бота нет прав.")
                 print(e)
 
-# ------------------ ПИНГ ------------------
-
-@dp.message(Command("ping"))
-async def ping(msg: Message):
-    start = time.time()
-    reply = await msg.answer("🏓 Pong!")
-    end = time.time()
-
-    ping_ms = int((end - start) * 1000)
-    await reply.edit_text(f"🏓 Pong! ({ping_ms} ms)")
-
-# ------------------ СТАРТ ------------------
-
-@dp.message(Command("start"))
-async def start(message: Message):
-    await message.answer("Бот запущен!")
-
-# ------------------ МУТ / УНМУТ ------------------
-
-@dp.message(Command("mute"))
-async def mute_user(msg: Message):
-    if not msg.reply_to_message:
-        await msg.answer("❗ Используй команду в ответ на сообщение пользователя.")
-        return
-
-    user = msg.reply_to_message.from_user
-    user_id = user.id
-    MUTE_TIME = 2400  # минут
-
-    try:
-        await msg.bot.restrict_chat_member(
-            chat_id=msg.chat.id,
-            user_id=user_id,
-            permissions=ChatPermissions(can_send_messages=False),
-            until_date=timedelta(minutes=MUTE_TIME)
-        )
-        await msg.answer(f"🔇 {user.full_name} получил мут на {MUTE_TIME} минут.")
-
-    except Exception as e:
-        await msg.answer("❗ Не удалось выдать мут. У бота нет прав.")
-        print(e)
-
-@dp.message(Command("unmute"))
-async def unmute_user(msg: Message):
-    if not msg.reply_to_message:
-        await msg.answer("❗ Используй команду в ответ на сообщение пользователя.")
-        return
-
-    user = msg.reply_to_message.from_user
-    user_id = user.id
-
-    try:
-        await msg.bot.restrict_chat_member(
-            chat_id=msg.chat.id,
-            user_id=user_id,
-            permissions=ChatPermissions(can_send_messages=True)
-        )
-        await msg.answer(f"🔊 {user.full_name} теперь может писать сообщения.")
-
-    except Exception as e:
-        await msg.answer("❗ Не удалось снять мут. У бота нет прав.")
-        print(e)
-
-# ------------------ HELP ------------------
-
-@dp.message(Command("help"))
-async def help_cmd(msg: Message):
-    text = (
-        "📘 *Команды бота:*\n\n"
-        "⚠️ /warn — выдать предупреждение\n"
-        "🧹 /clear — сбросить варны\n"
-        "📋 /warns — список предупреждений\n"
-        "🪙 /coin — монетка\n"
-        "💬 /quote — цитата\n"
-        "🏓 /ping — задержка\n"
-        "🔇 /mute — мут\n"
-        "🔊 /unmute — размут\n"
-        "👢 /del — удалить сообщение\n"
-        "\n"
-        "Анти‑мат и авто‑мут включены."
-    )
-
-    await msg.answer(text, parse_mode="Markdown")
-
-# ------------------ УДАЛЕНИЕ СООБЩЕНИЯ ------------------
-
-@dp.message(Command("del"))
-async def delete_msg(message: Message):
-    if not message.reply_to_message:
-        await message.answer("Ответь на сообщение пользователя.")
-        return
-
-    msg_id = message.reply_to_message.message_id
-    await bot.delete_message(message.chat.id, msg_id)
-
-    await message.answer("👢 Сообщение удалено.")
 
 # ------------------ ЗАПУСК ------------------
 
